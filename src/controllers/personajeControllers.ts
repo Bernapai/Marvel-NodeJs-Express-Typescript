@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import Personaje from "../models/personaje";
 
 class PersonajeController {
 
@@ -7,9 +8,10 @@ class PersonajeController {
     }
 
 
-    consultarTodos(req: Request, res: Response) {
+    async consultarTodos(req: Request, res: Response) {
         try {
-            res.status(200).json({ mensaje: "Consulta exitosa" });
+            const data = await Personaje.find()
+            res.status(200).json(data)
         } catch (error: unknown) {
             if (error instanceof Error) {
                 res.status(500).json({ error: error.message });
@@ -19,9 +21,10 @@ class PersonajeController {
         }
     }
 
-    agregar(req: Request, res: Response) {
+    async agregar(req: Request, res: Response) {
         try {
-            res.status(200).json({ mensaje: "Consulta exitosa" });
+            const newPersonaje = await Personaje.save(req.body);
+            res.status(201).json(newPersonaje)
         } catch (error: unknown) {
             if (error instanceof Error) {
                 res.status(500).json({ error: error.message });
@@ -32,9 +35,14 @@ class PersonajeController {
     }
 
 
-    consultarPorId(req: Request, res: Response) {
+    async consultarPorId(req: Request, res: Response) {
+        const { id } = req.params;
         try {
-            res.status(200).json({ mensaje: "Consulta exitosa" });
+            const data = await Personaje.findOneBy({ id: Number(id) })
+            if (!data) {
+                throw new Error('Personaje no encontrado')
+            }
+            res.status(200).json(data)
         } catch (error: unknown) {
             if (error instanceof Error) {
                 res.status(500).json({ error: error.message });
@@ -44,9 +52,19 @@ class PersonajeController {
         }
     }
 
-    eliminarPorId(req: Request, res: Response) {
+    async eliminarPorId(req: Request, res: Response) {
+        const { id } = req.params;
         try {
-            res.status(200).json({ mensaje: "Consulta exitosa" });
+            const data = await Personaje.findOneBy({ id: Number(id) });
+
+            if (!data) {
+                throw new Error('Personaje no encontrado')
+            }
+
+            await Personaje.delete({ id: Number(id) });
+            const dataEliminada = await Personaje.findOneBy({ id: Number(id) });
+            res.status(204).json(dataEliminada);
+
         } catch (error: unknown) {
             if (error instanceof Error) {
                 res.status(500).json({ error: error.message });
@@ -56,9 +74,21 @@ class PersonajeController {
         }
     }
 
-    actualizarPorId(req: Request, res: Response) {
+    async actualizarPorId(req: Request, res: Response) {
+        const { id } = req.params;
+
         try {
-            res.status(200).json({ mensaje: "Consulta exitosa" });
+
+            const data = await Personaje.findOneBy({ id: Number(id) });
+
+            if (!data) {
+                throw new Error('Personaje no encontrado')
+            }
+
+            await Personaje.update({ id: Number(id) }, req.body);
+            const dataActualizada = await Personaje.findOneBy({ id: Number(id) });
+            res.status(200).json(dataActualizada);
+
         } catch (error: unknown) {
             if (error instanceof Error) {
                 res.status(500).json({ error: error.message });
@@ -66,8 +96,14 @@ class PersonajeController {
                 res.status(500).json({ error: "Error desconocido" });
             }
         }
+
+
     }
+
 
 }
 
-export default PersonajeController;  
+
+
+
+export default PersonajeController;

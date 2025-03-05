@@ -1,8 +1,8 @@
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 import Pelicula from "./pelicula";
 import Comic from "./comic";
 
-@Entity()
+@Entity('personajes')
 export default class Personaje {
     @PrimaryGeneratedColumn()
     id: Number;
@@ -26,8 +26,10 @@ export default class Personaje {
     descripcion: String;
 
     @ManyToMany(() => Pelicula, (pelicula) => pelicula.personajes) // Relación de muchos a muchos
+    @JoinTable()
     peliculas: Pelicula[];
 
-    @ManyToMany(() => Comic, (comic) => comic.personajes) // Relación de muchos a muchos
+    @ManyToMany(() => Comic, (comic) => comic.personajes)
+    @JoinTable()
     comics: Comic[];
 }

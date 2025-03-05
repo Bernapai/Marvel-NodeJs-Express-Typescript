@@ -1,8 +1,7 @@
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 import Personaje from "./personaje"
 
-
-@Entity()
+@Entity('comics')
 export default class Comic {
     @PrimaryGeneratedColumn()
     id: Number;

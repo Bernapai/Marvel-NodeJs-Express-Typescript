@@ -1,4 +1,7 @@
 import { DataSource } from "typeorm";
+import Personaje from "../models/personaje";
+import Comic from "../models/comic";
+import Pelicula from "../models/pelicula";
 
 export const AppDataSource = new DataSource({
     type: 'mysql',
@@ -8,5 +11,6 @@ export const AppDataSource = new DataSource({
     password: 'Juanber123()',
     database: 'marvel',
     logging: true,
-    entities: [],
+    entities: [Pelicula, Personaje, Comic],
+    synchronize: true,
 });
