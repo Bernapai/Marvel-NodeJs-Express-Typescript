@@ -1,17 +1,14 @@
 import { Request, Response } from "express";
-import Comic from "../models/comic";
+import { AppDataSource } from "../database/conexion";
+import Comic from "../models/comic"; // Asegúrate de que la entidad esté correctamente importada
 
 class ComicController {
-
-    constructor() {
-
-    }
-
+    private comicRepository = AppDataSource.getRepository(Comic); // Obtén el repositorio
 
     async consultarTodos(req: Request, res: Response) {
         try {
-            const data = await Comic.find()
-            res.status(200).json(data)
+            const data = await this.comicRepository.find(); // Usa el repositorio
+            res.status(200).json(data);
         } catch (error: unknown) {
             if (error instanceof Error) {
                 res.status(500).json({ error: error.message });
@@ -23,8 +20,9 @@ class ComicController {
 
     async agregar(req: Request, res: Response) {
         try {
-            const newPersonaje = await Comic.save(req.body);
-            res.status(201).json(newPersonaje)
+            const newComic = this.comicRepository.create(req.body); // Crea la entidad
+            const savedComic = await this.comicRepository.save(newComic); // Guarda la entidad
+            res.status(201).json(savedComic);
         } catch (error: unknown) {
             if (error instanceof Error) {
                 res.status(500).json({ error: error.message });
@@ -34,15 +32,14 @@ class ComicController {
         }
     }
 
-
     async consultarPorId(req: Request, res: Response) {
         const { id } = req.params;
         try {
-            const data = await Comic.findOneBy({ id: Number(id) })
+            const data = await this.comicRepository.findOneBy({ id: Number(id) }); // Usa el repositorio
             if (!data) {
-                throw new Error('Comic no encontrado')
+                throw new Error('Comic no encontrado');
             }
-            res.status(200).json(data)
+            res.status(200).json(data);
         } catch (error: unknown) {
             if (error instanceof Error) {
                 res.status(500).json({ error: error.message });
@@ -55,16 +52,14 @@ class ComicController {
     async eliminarPorId(req: Request, res: Response) {
         const { id } = req.params;
         try {
-            const data = await Comic.findOneBy({ id: Number(id) });
+            const data = await this.comicRepository.findOneBy({ id: Number(id) });
 
             if (!data) {
-                throw new Error('Comic no encontrado')
+                throw new Error('Comic no encontrado');
             }
 
-            await Comic.delete({ id: Number(id) });
-            const dataEliminada = await Comic.findOneBy({ id: Number(id) });
-            res.status(204).json(dataEliminada);
-
+            await this.comicRepository.delete({ id: Number(id) }); // Usa el repositorio
+            res.status(204).send(); // 204 No Content
         } catch (error: unknown) {
             if (error instanceof Error) {
                 res.status(500).json({ error: error.message });
@@ -76,19 +71,16 @@ class ComicController {
 
     async actualizarPorId(req: Request, res: Response) {
         const { id } = req.params;
-
         try {
-
-            const data = await Comic.findOneBy({ id: Number(id) });
+            const data = await this.comicRepository.findOneBy({ id: Number(id) });
 
             if (!data) {
-                throw new Error('Comic no encontrado')
+                throw new Error('Comic no encontrado');
             }
 
-            await Comic.update({ id: Number(id) }, req.body);
-            const dataActualizada = await Comic.findOneBy({ id: Number(id) });
+            await this.comicRepository.update({ id: Number(id) }, req.body); // Usa el repositorio
+            const dataActualizada = await this.comicRepository.findOneBy({ id: Number(id) });
             res.status(200).json(dataActualizada);
-
         } catch (error: unknown) {
             if (error instanceof Error) {
                 res.status(500).json({ error: error.message });
@@ -96,9 +88,7 @@ class ComicController {
                 res.status(500).json({ error: "Error desconocido" });
             }
         }
-
-
     }
 }
 
-export default ComicController;  
+export default ComicController;

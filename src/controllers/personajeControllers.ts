@@ -1,17 +1,14 @@
 import { Request, Response } from "express";
-import Personaje from "../models/personaje";
+import Personaje from "../models/personaje"; // Asegúrate de que la entidad esté correctamente importada
+import { AppDataSource } from "../database/conexion";
 
 class PersonajeController {
-
-    constructor() {
-
-    }
-
+    private personajeRepository = AppDataSource.getRepository(Personaje); // Obtén el repositorio desde AppDataSource
 
     async consultarTodos(req: Request, res: Response) {
         try {
-            const data = await Personaje.find()
-            res.status(200).json(data)
+            const data = await this.personajeRepository.find(); // Usa el repositorio
+            res.status(200).json(data);
         } catch (error: unknown) {
             if (error instanceof Error) {
                 res.status(500).json({ error: error.message });
@@ -23,8 +20,9 @@ class PersonajeController {
 
     async agregar(req: Request, res: Response) {
         try {
-            const newPersonaje = await Personaje.save(req.body);
-            res.status(201).json(newPersonaje)
+            const newPersonaje = this.personajeRepository.create(req.body); // Crea la entidad
+            const savedPersonaje = await this.personajeRepository.save(newPersonaje); // Guarda la entidad
+            res.status(201).json(savedPersonaje);
         } catch (error: unknown) {
             if (error instanceof Error) {
                 res.status(500).json({ error: error.message });
@@ -34,15 +32,14 @@ class PersonajeController {
         }
     }
 
-
     async consultarPorId(req: Request, res: Response) {
         const { id } = req.params;
         try {
-            const data = await Personaje.findOneBy({ id: Number(id) })
+            const data = await this.personajeRepository.findOneBy({ id: Number(id) }); // Usa el repositorio
             if (!data) {
-                throw new Error('Personaje no encontrado')
+                throw new Error('Personaje no encontrado');
             }
-            res.status(200).json(data)
+            res.status(200).json(data);
         } catch (error: unknown) {
             if (error instanceof Error) {
                 res.status(500).json({ error: error.message });
@@ -55,16 +52,14 @@ class PersonajeController {
     async eliminarPorId(req: Request, res: Response) {
         const { id } = req.params;
         try {
-            const data = await Personaje.findOneBy({ id: Number(id) });
+            const data = await this.personajeRepository.findOneBy({ id: Number(id) });
 
             if (!data) {
-                throw new Error('Personaje no encontrado')
+                throw new Error('Personaje no encontrado');
             }
 
-            await Personaje.delete({ id: Number(id) });
-            const dataEliminada = await Personaje.findOneBy({ id: Number(id) });
-            res.status(204).json(dataEliminada);
-
+            await this.personajeRepository.delete({ id: Number(id) }); // Usa el repositorio
+            res.status(204).send(); // 204 No Content
         } catch (error: unknown) {
             if (error instanceof Error) {
                 res.status(500).json({ error: error.message });
@@ -76,19 +71,16 @@ class PersonajeController {
 
     async actualizarPorId(req: Request, res: Response) {
         const { id } = req.params;
-
         try {
-
-            const data = await Personaje.findOneBy({ id: Number(id) });
+            const data = await this.personajeRepository.findOneBy({ id: Number(id) });
 
             if (!data) {
-                throw new Error('Personaje no encontrado')
+                throw new Error('Personaje no encontrado');
             }
 
-            await Personaje.update({ id: Number(id) }, req.body);
-            const dataActualizada = await Personaje.findOneBy({ id: Number(id) });
+            await this.personajeRepository.update({ id: Number(id) }, req.body); // Usa el repositorio
+            const dataActualizada = await this.personajeRepository.findOneBy({ id: Number(id) });
             res.status(200).json(dataActualizada);
-
         } catch (error: unknown) {
             if (error instanceof Error) {
                 res.status(500).json({ error: error.message });
@@ -96,14 +88,7 @@ class PersonajeController {
                 res.status(500).json({ error: "Error desconocido" });
             }
         }
-
-
     }
-
-
 }
-
-
-
 
 export default PersonajeController;
